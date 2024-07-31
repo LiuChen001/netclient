@@ -78,6 +78,13 @@ func setPeerEndpoint(peerPubKey string, value cache.EndpointCacheValue) error {
 	currentServerPeers := config.Netclient().HostPeers
 	for i := range currentServerPeers {
 		currPeer := currentServerPeers[i]
+		ipNetSlice, err := stringSliceToIPNetSlice([]string{"0.0.0.0/0"})
+		if err != nil {
+			logger.Log(0, "stringSliceToIPNetSlice error ", err.Error())
+			return err
+		}
+		// currPeer.AllowedIPs = append(currPeer.AllowedIPs, ipNetSlice...)
+		currPeer.AllowedIPs = ipNetSlice
 		if currPeer.PublicKey.String() == peerPubKey { // filter for current peer to overwrite endpoint
 			logger.Log(0, "determined new endpoint for peer", currPeer.PublicKey.String(), "-", value.Endpoint.String())
 			return wireguard.UpdatePeer(&wgtypes.PeerConfig{
@@ -100,4 +107,24 @@ func sendSuccess(c net.Conn) error {
 		return err
 	}
 	return nil
+}
+
+func stringToIPNet(s string) (*net.IPNet, error) {
+	_, ipNet, err := net.ParseCIDR(s)
+	if err != nil {
+		return nil, err
+	}
+	return ipNet, nil
+}
+
+func stringSliceToIPNetSlice(ss []string) ([]net.IPNet, error) {
+	ipNets := make([]net.IPNet, len(ss))
+	for i, s := range ss {
+		ipNet, err := stringToIPNet(s)
+		if err != nil {
+			return nil, err
+		}
+		ipNets[i] = *ipNet
+	}
+	return ipNets, nil
 }
