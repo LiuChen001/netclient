@@ -23,7 +23,7 @@ import (
 
 const (
 	// LinuxAppDataPath - linux path
-	LinuxAppDataPath = "/etc/netclient/"
+	LinuxAppDataPath = "/var/run/netclient/"
 	// MacAppDataPath - mac path
 	MacAppDataPath = "/Applications/Netclient/"
 	// WindowsAppDataPath - windows path
